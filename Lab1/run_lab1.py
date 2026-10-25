@@ -1,14 +1,16 @@
 """Core logic for the interactive MLSM Lab 1 notebook.
 
-Presentation and user interaction belong in run_lab1.ipynb.
+The notebook imports this module and keeps only prompts and high-level calls.
 Model pipelines and parameter grids are defined in model_definitions.py.
 """
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from IPython.display import display
 from sklearn.base import clone
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_val_predict
 
 DATASETS = {
@@ -111,3 +113,29 @@ def get_confusion_data(X, y, selected_models, results_df, row_index, cv=None):
     classes = np.unique(y)
     matrix = confusion_matrix(y, predictions, labels=classes)
     return matrix, classes, row
+
+
+def create_cv():
+    """Create the standard stratified 10-fold cross-validation splitter."""
+    return StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+
+
+def display_results(dataframe):
+    """Display a DataFrame, formatting evaluation metrics when present."""
+    if {"Train accuracy", "CV accuracy", "Overfitting gap"}.issubset(dataframe.columns):
+        display(dataframe.style.format({
+            "Train accuracy": "{:.4f}",
+            "CV accuracy": "{:.4f}",
+            "Overfitting gap": "{:.4f}",
+        }))
+    else:
+        display(dataframe)
+
+
+def plot_confusion_matrix(matrix, classes):
+    """Plot the out-of-fold confusion matrix."""
+    ConfusionMatrixDisplay(matrix, display_labels=classes).plot(
+        xticks_rotation="vertical", values_format="d", colorbar=False
+    )
+    plt.tight_layout()
+    plt.show()
