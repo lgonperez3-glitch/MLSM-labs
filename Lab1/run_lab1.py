@@ -33,17 +33,17 @@ def resolve_lab_dir():
         return cwd
     if (cwd / "Lab1" / "model_definitions.py").exists():
         return cwd / "Lab1"
-    raise FileNotFoundError("No se encuentra Lab1/model_definitions.py ni su carpeta data/.")
+    raise FileNotFoundError("Could not find Lab1/model_definitions.py or its data/ directory.")
 
 
 def load_dataset(dataset_choice, data_dir=None):
     """Load a dataset and return its name, features, labels and class counts."""
     if dataset_choice not in DATASETS:
-        raise ValueError("Dataset no válido: selecciona 1, 2 o 3.")
+        raise ValueError("Invalid dataset: select 1, 2, or 3.")
     name, filename, target = DATASETS[dataset_choice]
     csv_path = Path(data_dir or resolve_lab_dir() / "data") / filename
     if not csv_path.exists():
-        raise FileNotFoundError(f"No se encuentra el archivo: {csv_path}")
+        raise FileNotFoundError(f"File not found: {csv_path}")
 
     df = pd.read_csv(csv_path, skipinitialspace=True).dropna(subset=[target])
     y = df[target].copy()
@@ -54,8 +54,8 @@ def load_dataset(dataset_choice, data_dir=None):
             X[column] = X[column].map({values[0]: 0, values[1]: 1})
     X = X.select_dtypes(include=np.number)
     if X.empty:
-        raise ValueError(f"No se encontraron características numéricas en {filename}.")
-    return name, filename, X, y, y.value_counts().rename("Muestras")
+        raise ValueError(f"No numeric features were found in {filename}.")
+    return name, filename, X, y, y.value_counts().rename("Samples")
 
 
 def select_models(dataset_name, n_features, choice):
@@ -67,10 +67,10 @@ def select_models(dataset_name, n_features, choice):
     if choice == "all":
         return models
     if choice not in MODEL_OPTIONS:
-        raise ValueError("Modelo no válido: selecciona l, k, d, a o all.")
+        raise ValueError("Invalid model: select l, k, d, a, or all.")
     name = MODEL_OPTIONS[choice]
     if name not in models:
-        raise ValueError(f"{name} no está definido para {dataset_name}.")
+        raise ValueError(f"{name} is not defined for {dataset_name}.")
     return {name: models[name]}
 
 
@@ -95,7 +95,7 @@ def evaluate_models(X, y, selected_models, cv=None):
                 "Overfitting gap": train_acc - cv_acc,
             })
     if not rows:
-        raise ValueError("No se ha evaluado ninguna configuración.")
+        raise ValueError("No configurations were evaluated.")
     return pd.DataFrame(rows).sort_values(
         ["CV accuracy", "Overfitting gap"], ascending=[False, True]
     ).reset_index(drop=True)
@@ -104,7 +104,7 @@ def evaluate_models(X, y, selected_models, cv=None):
 def get_confusion_data(X, y, selected_models, results_df, row_index, cv=None):
     """Return out-of-fold confusion matrix and metadata for the selected result row."""
     if not 0 <= row_index < len(results_df):
-        raise IndexError(f"La fila debe estar entre 0 y {len(results_df) - 1}.")
+        raise IndexError(f"The row index must be between 0 and {len(results_df) - 1}.")
     cv = cv or StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
     row = results_df.iloc[row_index]
     name, params = row["Algorithm"], row["Parameters"]
@@ -157,29 +157,29 @@ def plot_confusion_matrix(matrix, classes, title, parameters):
 
 def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
     """Optionally export the results table, run configuration, and confusion figure."""
-    answer = input("¿Quieres guardar los resultados y la figura? [y/n]: ").strip().lower()
+    answer = input("Save the results and figure? [y/n]: ").strip().lower()
     while answer not in {"y", "n"}:
-        answer = input("Introduce y (sí) o n (no): ").strip().lower()
+        answer = input("Enter y (yes) or n (no): ").strip().lower()
     if answer == "n":
-        print("No se ha guardado ningún archivo. Puedes volver a ejecutar esta celda más tarde.")
+        print("No files were saved. You can run this cell again later.")
         return
 
     if fig is None:
-        print("No hay ninguna figura de matriz de confusión disponible. Genera la matriz antes de guardar.")
+        print("No confusion matrix figure is available. Generate the matrix before saving.")
         return
 
     results_dir = resolve_lab_dir() / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
     while True:
-        base_name = input("Nombre base de los archivos (sin extensión): ").strip()
+        base_name = input("Base filename (without extension): ").strip()
         if not base_name or Path(base_name).name != base_name or base_name in {".", ".."}:
-            print("Introduce un nombre válido, sin carpetas ni rutas.")
+            print("Enter a valid filename without folders or paths.")
             continue
         excel_path = results_dir / f"{base_name}.xlsx"
         figure_path = results_dir / f"{base_name}.png"
         existing = [path.name for path in (excel_path, figure_path) if path.exists()]
         if existing:
-            print(f"Ya existe: {', '.join(existing)}. Elige otro nombre.")
+            print(f"Already exists: {', '.join(existing)}. Choose another name.")
             continue
         break
 
@@ -213,5 +213,5 @@ def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
                                 cell.number_format = "0.0000"
 
     fig.savefig(figure_path, dpi=300, bbox_inches="tight")
-    print(f"Excel guardado en: {excel_path}")
-    print(f"Figura guardada en: {figure_path}")
+    print(f"Excel file saved to: {excel_path}")
+    print(f"Figure saved to: {figure_path}")
