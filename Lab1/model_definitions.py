@@ -143,9 +143,9 @@ def _features_30_sec_models(n_features):
             ]),
             {
                 "selector__k": selector_options,
-                "model__hidden_layer_sizes": [(50,), (100,), (100, 50), (128, 64)],
-                "model__alpha": [0.0001, 0.001, 0.01],
-                "model__learning_rate_init": [0.0005, 0.001],
+                "model__hidden_layer_sizes": [(100, 50), (128, 64)],
+                "model__alpha": [0.0001, 0.001],
+                "model__learning_rate_init": [0.001],
             },
         ),
     }
@@ -211,9 +211,9 @@ def _features_3_sec_models(n_features):
                 )),
             ]),
             {
-                "selector__k": selector_options,
+                "selector__k": ['all'],
                 "model__hidden_layer_sizes": [(50,), (100,), (100, 50)],
-                "model__alpha": [0.001, 0.01, 0.1],
+                "model__alpha": [0.001 , 0.01, 0.1],
             },
         ),
     }
