@@ -132,57 +132,6 @@ def display_results(dataframe):
         display(dataframe)
 
 
-def _ask_save_path(extension, description):
-    """Ask whether to save an artifact and return a non-existing path or None."""
-    answer = input(f"¿Quieres guardar {description}? [y/n]: ").strip().lower()
-    while answer not in {"y", "n"}:
-        answer = input("Introduce y (sí) o n (no): ").strip().lower()
-    if answer == "n":
-        return None
-
-    results_dir = resolve_lab_dir() / "results"
-    results_dir.mkdir(parents=True, exist_ok=True)
-    while True:
-        filename = input(
-            f"Nombre del archivo (sin extensión .{extension}): "
-        ).strip()
-        # Only accept a filename, not a path, to keep outputs inside results/.
-        if not filename or Path(filename).name != filename or filename in {".", ".."}:
-            print("Introduce un nombre válido, sin carpetas ni rutas.")
-            continue
-        if not filename.lower().endswith(f".{extension}"):
-            filename = f"{filename}.{extension}"
-        path = results_dir / filename
-        if path.exists():
-            print(f"Ya existe {path.name}. Elige otro nombre.")
-            continue
-        return path
-
-
-def save_results_excel(results_df, dataset_name):
-    """Optionally save the displayed results table to an Excel file."""
-    path = _ask_save_path("xlsx", "la tabla de resultados")
-    if path is None:
-        return
-    export_df = results_df.copy()
-    export_df["Parameters"] = export_df["Parameters"].map(str)
-    with pd.ExcelWriter(path, engine="openpyxl") as writer:
-        export_df.to_excel(writer, index=False, sheet_name="Results")
-        worksheet = writer.sheets["Results"]
-        worksheet.freeze_panes = "A2"
-        worksheet.auto_filter.ref = worksheet.dimensions
-        for column_cells in worksheet.columns:
-            width = min(max(max(len(str(cell.value or "")) for cell in column_cells) + 2, 12), 60)
-            worksheet.column_dimensions[column_cells[0].column_letter].width = width
-        for column in ("Train accuracy", "CV accuracy", "Overfitting gap"):
-            if column in export_df.columns:
-                col_idx = export_df.columns.get_loc(column) + 1
-                for cell in worksheet.iter_cols(min_col=col_idx, max_col=col_idx, min_row=2):
-                    for item in cell:
-                        item.number_format = "0.0000"
-    print(f"Resultados guardados en: {path}")
-
-
 def plot_confusion_matrix(matrix, classes):
     """Plot the out-of-fold confusion matrix and return its figure."""
     display = ConfusionMatrixDisplay(matrix, display_labels=classes)
@@ -193,10 +142,63 @@ def plot_confusion_matrix(matrix, classes):
     return fig
 
 
-def save_confusion_figure(fig):
-    """Optionally save the confusion matrix figure as a PNG file."""
-    path = _ask_save_path("png", "la matriz de confusión")
-    if path is None:
+def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
+    """Optionally export the results table, run configuration, and confusion figure."""
+    answer = input("¿Quieres guardar los resultados y la figura? [y/n]: ").strip().lower()
+    while answer not in {"y", "n"}:
+        answer = input("Introduce y (sí) o n (no): ").strip().lower()
+    if answer == "n":
+        print("No se ha guardado ningún archivo. Puedes volver a ejecutar esta celda más tarde.")
         return
-    fig.savefig(path, dpi=300, bbox_inches="tight")
-    print(f"Figura guardada en: {path}")
+
+    if fig is None:
+        print("No hay ninguna figura de matriz de confusión disponible. Genera la matriz antes de guardar.")
+        return
+
+    results_dir = resolve_lab_dir() / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    while True:
+        base_name = input("Nombre base de los archivos (sin extensión): ").strip()
+        if not base_name or Path(base_name).name != base_name or base_name in {".", ".."}:
+            print("Introduce un nombre válido, sin carpetas ni rutas.")
+            continue
+        excel_path = results_dir / f"{base_name}.xlsx"
+        figure_path = results_dir / f"{base_name}.png"
+        existing = [path.name for path in (excel_path, figure_path) if path.exists()]
+        if existing:
+            print(f"Ya existe: {', '.join(existing)}. Elige otro nombre.")
+            continue
+        break
+
+    export_df = results_df.copy()
+    export_df["Parameters"] = export_df["Parameters"].map(str)
+    config_rows = []
+    for model_name, (_, param_grid) in selected_models.items():
+        config_rows.append({
+            "Dataset": dataset_name,
+            "Selected model": model_name,
+            "Parameter grid": str(param_grid),
+        })
+    config_df = pd.DataFrame(config_rows)
+
+    with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
+        export_df.to_excel(writer, index=False, sheet_name="Results")
+        config_df.to_excel(writer, index=False, sheet_name="Configuration")
+        for sheet_name, dataframe in (("Results", export_df), ("Configuration", config_df)):
+            worksheet = writer.sheets[sheet_name]
+            worksheet.freeze_panes = "A2"
+            worksheet.auto_filter.ref = worksheet.dimensions
+            for column_cells in worksheet.columns:
+                width = min(max(max(len(str(cell.value or "")) for cell in column_cells) + 2, 12), 60)
+                worksheet.column_dimensions[column_cells[0].column_letter].width = width
+            if sheet_name == "Results":
+                for column in ("Train accuracy", "CV accuracy", "Overfitting gap"):
+                    if column in dataframe.columns:
+                        col_idx = dataframe.columns.get_loc(column) + 1
+                        for cells in worksheet.iter_cols(min_col=col_idx, max_col=col_idx, min_row=2):
+                            for cell in cells:
+                                cell.number_format = "0.0000"
+
+    fig.savefig(figure_path, dpi=300, bbox_inches="tight")
+    print(f"Excel guardado en: {excel_path}")
+    print(f"Figura guardada en: {figure_path}")
