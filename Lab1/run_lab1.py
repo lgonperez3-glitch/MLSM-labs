@@ -168,7 +168,15 @@ def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
         print("No confusion matrix figure is available. Generate the matrix before saving.")
         return
 
-    results_dir = resolve_lab_dir() / "results"
+    dataset_folders = {
+        "GenreAll": "GenreAll",
+        "features-30-sec": "features-30-sec",
+        "features-3-sec": "features-3-sec",
+    }
+    if dataset_name not in dataset_folders:
+        raise ValueError(f"Unknown dataset: {dataset_name}")
+
+    results_dir = resolve_lab_dir() / "results" / dataset_folders[dataset_name]
     results_dir.mkdir(parents=True, exist_ok=True)
     while True:
         base_name = input("Base filename (without extension): ").strip()
@@ -179,7 +187,7 @@ def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
         figure_path = results_dir / f"{base_name}.png"
         existing = [path.name for path in (excel_path, figure_path) if path.exists()]
         if existing:
-            print(f"Already exists: {', '.join(existing)}. Choose another name.")
+            print(f"File(s) already exist: {', '.join(existing)}. No files were saved. Choose another name.")
             continue
         break
 
