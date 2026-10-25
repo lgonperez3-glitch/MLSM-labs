@@ -133,16 +133,24 @@ def display_results(dataframe):
 
 
 def plot_confusion_matrix(matrix, classes, title, parameters):
-    """Plot the confusion matrix with dataset/model title and parameters as a footer."""
+    """Plot the confusion matrix, fitting title and parameter footer to the figure."""
+    from textwrap import fill
+
     display = ConfusionMatrixDisplay(matrix, display_labels=classes)
     display.plot(xticks_rotation="vertical", values_format="d", colorbar=False)
     fig = display.figure_
-    fig.suptitle(title, fontsize=12, y=0.98)
+
+    title_size = max(9, min(12, 900 / max(len(title), 1)))
+    parameter_text = fill(f"Parameters: {parameters}", width=105)
+    parameter_size = max(7, min(9, 900 / max(len(parameter_text), 1)))
+
+    fig.suptitle(title, fontsize=title_size, x=0.5, y=0.98, ha="center")
     fig.text(
-        0.5, 0.015, f"Parameters: {parameters}",
-        ha="center", va="bottom", fontsize=9, wrap=True
+        0.01, 0.015, parameter_text,
+        ha="left", va="bottom", fontsize=parameter_size, wrap=True
     )
-    fig.tight_layout(rect=(0, 0.07, 1, 0.93))
+    # Use the available figure width while preserving room for axis labels and footer.
+    fig.tight_layout(rect=(0.01, 0.09, 0.99, 0.92))
     plt.show()
     return fig
 
