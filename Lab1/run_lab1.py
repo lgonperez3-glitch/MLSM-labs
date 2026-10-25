@@ -27,12 +27,18 @@ MODEL_OPTIONS = {
 
 
 def resolve_lab_dir():
-    """Find Lab1 whether Jupyter starts in the repository root or Lab1."""
+    """Find the Lab1 directory whether Jupyter starts in the repository root or Lab1."""
     cwd = Path.cwd()
+
+    # Prefer the repository's Lab1 folder when running from the repository root.
+    lab1_dir = cwd / "Lab1"
+    if (lab1_dir / "model_definitions.py").exists() and (lab1_dir / "data").exists():
+        return lab1_dir
+
+    # Also support running Jupyter with Lab1 as the current working directory.
     if (cwd / "model_definitions.py").exists() and (cwd / "data").exists():
         return cwd
-    if (cwd / "Lab1" / "model_definitions.py").exists():
-        return cwd / "Lab1"
+
     raise FileNotFoundError("Could not find Lab1/model_definitions.py or its data/ directory.")
 
 
@@ -178,6 +184,7 @@ def save_run_outputs(results_df, dataset_name, selected_models, fig=None):
 
     results_dir = resolve_lab_dir() / "results" / dataset_folders[dataset_name]
     results_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Files will be saved in: {results_dir.resolve()}")
     while True:
         base_name = input("Base filename (without extension): ").strip()
         if not base_name or Path(base_name).name != base_name or base_name in {".", ".."}:
