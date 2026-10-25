@@ -132,10 +132,71 @@ def display_results(dataframe):
         display(dataframe)
 
 
+def _ask_save_path(extension, description):
+    """Ask whether to save an artifact and return a non-existing path or None."""
+    answer = input(f"¿Quieres guardar {description}? [y/n]: ").strip().lower()
+    while answer not in {"y", "n"}:
+        answer = input("Introduce y (sí) o n (no): ").strip().lower()
+    if answer == "n":
+        return None
+
+    results_dir = resolve_lab_dir() / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    while True:
+        filename = input(
+            f"Nombre del archivo (sin extensión .{extension}): "
+        ).strip()
+        # Only accept a filename, not a path, to keep outputs inside results/.
+        if not filename or Path(filename).name != filename or filename in {".", ".."}:
+            print("Introduce un nombre válido, sin carpetas ni rutas.")
+            continue
+        if not filename.lower().endswith(f".{extension}"):
+            filename = f"{filename}.{extension}"
+        path = results_dir / filename
+        if path.exists():
+            print(f"Ya existe {path.name}. Elige otro nombre.")
+            continue
+        return path
+
+
+def save_results_excel(results_df, dataset_name):
+    """Optionally save the displayed results table to an Excel file."""
+    path = _ask_save_path("xlsx", "la tabla de resultados")
+    if path is None:
+        return
+    export_df = results_df.copy()
+    export_df["Parameters"] = export_df["Parameters"].map(str)
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        export_df.to_excel(writer, index=False, sheet_name="Results")
+        worksheet = writer.sheets["Results"]
+        worksheet.freeze_panes = "A2"
+        worksheet.auto_filter.ref = worksheet.dimensions
+        for column_cells in worksheet.columns:
+            width = min(max(max(len(str(cell.value or "")) for cell in column_cells) + 2, 12), 60)
+            worksheet.column_dimensions[column_cells[0].column_letter].width = width
+        for column in ("Train accuracy", "CV accuracy", "Overfitting gap"):
+            if column in export_df.columns:
+                col_idx = export_df.columns.get_loc(column) + 1
+                for cell in worksheet.iter_cols(min_col=col_idx, max_col=col_idx, min_row=2):
+                    for item in cell:
+                        item.number_format = "0.0000"
+    print(f"Resultados guardados en: {path}")
+
+
 def plot_confusion_matrix(matrix, classes):
-    """Plot the out-of-fold confusion matrix."""
-    ConfusionMatrixDisplay(matrix, display_labels=classes).plot(
-        xticks_rotation="vertical", values_format="d", colorbar=False
-    )
-    plt.tight_layout()
+    """Plot the out-of-fold confusion matrix and return its figure."""
+    display = ConfusionMatrixDisplay(matrix, display_labels=classes)
+    display.plot(xticks_rotation="vertical", values_format="d", colorbar=False)
+    fig = display.figure_
+    fig.tight_layout()
     plt.show()
+    return fig
+
+
+def save_confusion_figure(fig):
+    """Optionally save the confusion matrix figure as a PNG file."""
+    path = _ask_save_path("png", "la matriz de confusión")
+    if path is None:
+        return
+    fig.savefig(path, dpi=300, bbox_inches="tight")
+    print(f"Figura guardada en: {path}")
