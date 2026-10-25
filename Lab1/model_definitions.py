@@ -87,24 +87,29 @@ def _genreall_models(n_features):
     }
 
 
-def _features_30_sec_models():
-    """Models and parameter grids specifically for the 30-second dataset."""
+def _features_30_sec_models(n_features):
+    """Models for the 30-second dataset, including feature selection."""
+    selector_options = [k for k in [10, 20, 30, 40, 50] if k < n_features]
+    selector_options.append("all")
     return {
         "Logistic Regression": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
             ]),
-            {"model__C": [0.01, 0.03, 0.1, 0.3, 1.0]},
+            {"selector__k": selector_options, "model__C": [0.01, 0.03, 0.1, 0.3, 1.0]},
         ),
         "k-NN": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", KNeighborsClassifier()),
             ]),
             {
+                "selector__k": selector_options,
                 "model__n_neighbors": [3, 5, 7, 9, 13, 17],
                 "model__weights": ["uniform", "distance"],
                 "model__p": [1, 2],
@@ -113,9 +118,11 @@ def _features_30_sec_models():
         "Decision Tree": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
             {
+                "selector__k": selector_options,
                 "model__max_depth": [5, 10, 15],
                 "model__min_samples_split": [5, 10],
                 "model__min_samples_leaf": [5, 10],
@@ -125,6 +132,7 @@ def _features_30_sec_models():
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", MLPClassifier(
                     max_iter=500,
                     random_state=42,
@@ -134,6 +142,7 @@ def _features_30_sec_models():
                 )),
             ]),
             {
+                "selector__k": selector_options,
                 "model__hidden_layer_sizes": [(30,), (50,), (100,), (50, 25)],
                 "model__alpha": [0.01, 0.1, 1.0],
             },
@@ -141,28 +150,33 @@ def _features_30_sec_models():
     }
 
 
-def _features_3_sec_models():
-    """Models and parameter grids specifically for the 3-second dataset.
+def _features_3_sec_models(n_features):
+    """Models for the 3-second dataset, including feature selection.
 
     This dataset has many more samples than the 30-second dataset, so the
     grids are deliberately different and kept moderate to control runtime.
     """
+    selector_options = [k for k in [10, 20, 30, 40, 50] if k < n_features]
+    selector_options.append("all")
     return {
         "Logistic Regression": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
             ]),
-            {"model__C": [0.03, 0.1, 0.3, 1.0, 3.0]},
+            {"selector__k": selector_options, "model__C": [0.03, 0.1, 0.3, 1.0, 3.0]},
         ),
         "k-NN": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", KNeighborsClassifier()),
             ]),
             {
+                "selector__k": selector_options,
                 "model__n_neighbors": [5, 9, 15, 25],
                 "model__weights": ["distance"],
                 "model__p": [1, 2],
@@ -171,9 +185,11 @@ def _features_3_sec_models():
         "Decision Tree": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
             {
+                "selector__k": selector_options,
                 "model__max_depth": [10, 20, None],
                 "model__min_samples_split": [5, 10, 20],
                 "model__min_samples_leaf": [2, 5, 10],
@@ -183,6 +199,7 @@ def _features_3_sec_models():
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
                 ("scaler", StandardScaler()),
+                ("selector", SelectKBest(score_func=f_classif)),
                 ("model", MLPClassifier(
                     solver="adam",
                     learning_rate_init=0.001,
@@ -195,6 +212,7 @@ def _features_3_sec_models():
                 )),
             ]),
             {
+                "selector__k": selector_options,
                 "model__hidden_layer_sizes": [(50,), (100,), (100, 50)],
                 "model__alpha": [0.001, 0.01, 0.1],
             },
@@ -207,7 +225,7 @@ def get_models(dataset, n_features):
     if dataset == "GenreAll":
         return _genreall_models(n_features)
     if dataset == "features-30-sec":
-        return _features_30_sec_models()
+        return _features_30_sec_models(n_features)
     if dataset == "features-3-sec":
-        return _features_3_sec_models()
+        return _features_3_sec_models(n_features)
     raise ValueError(f"Unknown dataset: {dataset}")
