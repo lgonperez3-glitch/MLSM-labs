@@ -32,8 +32,8 @@ def _genreall_models(n_features):
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
             ]),
             {
-                "selector__k": selector_options,
-                "model__C": [0.03, 0.1, 0.2, 0.3, 0.5, 1.0],
+                "selector__k": [150, 130, 180],
+                "model__C": [0.2, 0.3, 0.5],
             },
         ),
         "k-NN": (
@@ -44,8 +44,8 @@ def _genreall_models(n_features):
             ]),
             {
                 "selector__k": selector_options,
-                "model__n_neighbors": [5, 7, 9, 11, 15],
-                "model__weights": ["uniform", "distance"],
+                "model__n_neighbors": [5, 7],
+                "model__weights": ["distance"],
                 "model__p": [1, 2],
             },
         ),
@@ -55,9 +55,9 @@ def _genreall_models(n_features):
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
             {
-                "selector__k": selector_options,
-                "model__max_depth": [5, 10, 15],
-                "model__min_samples_leaf": [5, 10],
+                "selector__k": [200],
+                "model__max_depth": [10, 15],
+                "model__min_samples_leaf": [5],
                 "model__min_samples_split": [2, 10],
             },
         ),
@@ -77,7 +77,7 @@ def _genreall_models(n_features):
                 )),
             ]),
             {
-                "selector__k": selector_options,
+                "selector__k": [130, 150 160, 200, 'all'],
                 "model__hidden_layer_sizes": [(50,), (100,), (100, 50)],
                 "model__alpha": [0.001, 0.01, 0.1],
             },
@@ -102,7 +102,7 @@ def _features_30_sec_models(n_features):
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
             ]),
-            {"selector__k": selector_options, "model__C": [0.01, 0.03, 0.1, 0.3, 1.0]},
+            {"selector__k": [50, 40, "all"], "model__C": [0.1, 0.3, 1.0]},
         ),
         "k-NN": (
             Pipeline(common + [
@@ -111,9 +111,9 @@ def _features_30_sec_models(n_features):
                 ("model", KNeighborsClassifier()),
             ]),
             {
-                "selector__k": selector_options,
-                "model__n_neighbors": [3, 5, 7, 9, 13, 17],
-                "model__weights": ["uniform", "distance"],
+                "selector__k": ["all"],
+                "model__n_neighbors": [3, 5, 7],
+                "model__weights": ["distance"],
                 "model__p": [1, 2],
             },
         ),
@@ -124,7 +124,7 @@ def _features_30_sec_models(n_features):
             ]),
             {
                 "selector__k": selector_options,
-                "model__max_depth": [5, 10, 15],
+                "model__max_depth": [10, 15],
                 "model__min_samples_split": [5, 10],
                 "model__min_samples_leaf": [5, 10],
             },
@@ -168,7 +168,7 @@ def _features_3_sec_models(n_features):
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
             ]),
-            {"selector__k": selector_options, "model__C": [0.03, 0.1, 0.3, 1.0, 3.0]},
+            {"selector__k": ["all"], "model__C": [0.3, 1.0, 3.0]},
         ),
         "k-NN": (
             Pipeline(common + [
@@ -177,10 +177,10 @@ def _features_3_sec_models(n_features):
                 ("model", KNeighborsClassifier()),
             ]),
             {
-                "selector__k": selector_options,
-                "model__n_neighbors": [5, 9, 15, 25],
+                "selector__k": [50, 'all'],
+                "model__n_neighbors": [5, 9],
                 "model__weights": ["distance"],
-                "model__p": [1, 2],
+                "model__p": [1],
             },
         ),
         "Decision Tree": (
@@ -189,10 +189,10 @@ def _features_3_sec_models(n_features):
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
             {
-                "selector__k": selector_options,
-                "model__max_depth": [10, 20, None],
-                "model__min_samples_split": [5, 10, 20],
-                "model__min_samples_leaf": [2, 5, 10],
+                "selector__k": ["all"],
+                "model__max_depth": [20, None],
+                "model__min_samples_split": [5],
+                "model__min_samples_leaf": [2],
             },
         ),
         "Artificial Neural Network": (
