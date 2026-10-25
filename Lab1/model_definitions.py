@@ -35,7 +35,7 @@ PARAMETER_GRIDS = {
     },
     "Artificial Neural Network": {
         "model__hidden_layer_sizes": [
-            (30,), (50,), (100,), (50, 25), (100, 50)
+            (50,), (100,), (50, 25), (100, 50)
         ],
         "model__alpha": [0.0001, 0.001, 0.01, 0.1, 1.0],
         "model__learning_rate_init": [0.0005, 0.001],
