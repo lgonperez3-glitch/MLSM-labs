@@ -93,6 +93,7 @@ def _features_30_sec_models(n_features):
         "Logistic Regression": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
@@ -102,6 +103,7 @@ def _features_30_sec_models(n_features):
         "k-NN": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", KNeighborsClassifier()),
@@ -116,6 +118,7 @@ def _features_30_sec_models(n_features):
         "Decision Tree": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
@@ -129,6 +132,7 @@ def _features_30_sec_models(n_features):
         "Artificial Neural Network": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", MLPClassifier(
@@ -160,6 +164,7 @@ def _features_3_sec_models(n_features):
         "Logistic Regression": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", LogisticRegression(max_iter=5000, solver="lbfgs")),
@@ -169,6 +174,7 @@ def _features_3_sec_models(n_features):
         "k-NN": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", KNeighborsClassifier()),
@@ -183,6 +189,7 @@ def _features_3_sec_models(n_features):
         "Decision Tree": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", DecisionTreeClassifier(random_state=42)),
             ]),
@@ -196,6 +203,7 @@ def _features_3_sec_models(n_features):
         "Artificial Neural Network": (
             Pipeline([
                 ("imputer", SimpleImputer(strategy="median")),
+                ("variance", VarianceThreshold(threshold=0.0)),
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", MLPClassifier(
