@@ -27,20 +27,22 @@ MODEL_OPTIONS = {
 
 
 def resolve_lab_dir():
-    """Find the Lab1 directory whether Jupyter starts in the repository root or Lab1."""
+    """Return the directory containing this module, independent of Jupyter's working directory."""
+    # Using __file__ avoids accidentally saving to a different results/ directory
+    # when Jupyter is launched from the repository root or another folder.
+    module_dir = Path(__file__).resolve().parent
+    if (module_dir.name == "Lab1" and (module_dir / "model_definitions.py").exists()):
+        return module_dir
+
+    # Fallback for environments where this module is copied elsewhere.
     cwd = Path.cwd()
+    for candidate in (cwd / "Lab1", cwd):
+        if (candidate / "model_definitions.py").exists() and (candidate / "data").exists():
+            return candidate
 
-    # Prefer the repository's Lab1 folder when running from the repository root.
-    lab1_dir = cwd / "Lab1"
-    if (lab1_dir / "model_definitions.py").exists() and (lab1_dir / "data").exists():
-        return lab1_dir
-
-    # Also support running Jupyter with Lab1 as the current working directory.
-    if (cwd / "model_definitions.py").exists() and (cwd / "data").exists():
-        return cwd
-
-    raise FileNotFoundError("Could not find Lab1/model_definitions.py or its data/ directory.")
-
+    raise FileNotFoundError(
+        f"Could not locate the Lab1 directory. Module location: {module_dir}; current directory: {cwd}"
+    )
 
 def load_dataset(dataset_choice, data_dir=None):
     """Load a dataset and return its name, features, labels and class counts."""
