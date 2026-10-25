@@ -132,7 +132,7 @@ def _features_30_sec_models(n_features):
                 ("scaler", StandardScaler()),
                 ("selector", SelectKBest(score_func=f_classif)),
                 ("model", MLPClassifier(
-                    max_iter=500,
+                    max_iter=10000,
                     random_state=42,
                     early_stopping=False,
                     n_iter_no_change=15,
