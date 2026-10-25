@@ -24,7 +24,7 @@ PARAMETER_GRIDS = {
         "model__C": [0.01, 0.03, 0.1, 0.2, 0.3, 0.5, 1.0, 3.0],
     },
     "k-NN": {
-        "model__n_neighbors": [3, 5, 7, 9, 11, 13, 15, 17, 25],
+        "model__n_neighbors": [3, 5, 7, 9],
         "model__weights": ["uniform", "distance"],
         "model__p": [1, 2],
     },
@@ -35,7 +35,7 @@ PARAMETER_GRIDS = {
     },
     "Artificial Neural Network": {
         "model__hidden_layer_sizes": [
-            (30,), (50,), (100,), (50, 25), (100, 50), (128, 64)
+            (30,), (50,), (100,), (50, 25), (100, 50)
         ],
         "model__alpha": [0.0001, 0.001, 0.01, 0.1, 1.0],
         "model__learning_rate_init": [0.0005, 0.001],
