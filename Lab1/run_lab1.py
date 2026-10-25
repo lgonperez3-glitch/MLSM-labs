@@ -132,11 +132,12 @@ def display_results(dataframe):
         display(dataframe)
 
 
-def plot_confusion_matrix(matrix, classes):
-    """Plot the out-of-fold confusion matrix and return its figure."""
+def plot_confusion_matrix(matrix, classes, title):
+    """Plot the out-of-fold confusion matrix with dataset/model/parameters title."""
     display = ConfusionMatrixDisplay(matrix, display_labels=classes)
     display.plot(xticks_rotation="vertical", values_format="d", colorbar=False)
     fig = display.figure_
+    fig.suptitle(title, fontsize=11, y=1.02)
     fig.tight_layout()
     plt.show()
     return fig
