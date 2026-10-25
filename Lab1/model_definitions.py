@@ -16,9 +16,7 @@ from sklearn.neural_network import MLPClassifier
 
 def _genreall_models(n_features):
     """Models for GenreAll, including variance and feature selection."""
-    selector_options = [
-        k for k in [80, 100, 130, 150, 180, 200] if k <= n_features
-    ]
+    selector_options = [k for k in [80, 100, 130, 150, 180, 200] if k <= n_features]
     selector_options.append("all")
 
     common = [
