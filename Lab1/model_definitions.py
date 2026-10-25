@@ -145,8 +145,9 @@ def _features_30_sec_models(n_features):
             ]),
             {
                 "selector__k": selector_options,
-                "model__hidden_layer_sizes": [(30,), (50,), (100,), (50, 25)],
-                "model__alpha": [0.01, 0.1, 1.0],
+                "model__hidden_layer_sizes": [(50,), (100,), (100, 50), (128, 64)],
+                "model__alpha": [0.0001, 0.001, 0.01],
+                "model__learning_rate_init": [0.0005, 0.001],
             },
         ),
     }
