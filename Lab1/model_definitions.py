@@ -77,7 +77,7 @@ def _genreall_models(n_features):
                 )),
             ]),
             {
-                "selector__k": [130, 150 160, 200, 'all'],
+                "selector__k": [130, 150, 160, 200, 'all'],
                 "model__hidden_layer_sizes": [(50,), (100,), (100, 50)],
                 "model__alpha": [0.001, 0.01, 0.1],
             },
