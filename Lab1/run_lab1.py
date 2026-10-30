@@ -123,9 +123,9 @@ def get_confusion_data(X, y, selected_models, results_df, row_index, cv=None):
     return matrix, classes, row
 
 
-def create_cv():
+def create_cv(splits=10):
     """Create the standard stratified 10-fold cross-validation splitter."""
-    return StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+    return StratifiedKFold(splits, shuffle=True, random_state=42)
 
 
 def display_results(dataframe):
